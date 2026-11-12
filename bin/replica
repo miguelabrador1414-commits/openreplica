@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -eu
+
+SELF=$0
+while [ -L "$SELF" ]; do
+  DIR=$(CDPATH= cd -- "$(dirname -- "$SELF")" && pwd)
+  SELF=$(readlink "$SELF")
+  case "$SELF" in
+    /*) ;;
+    *) SELF="$DIR/$SELF" ;;
+  esac
+done
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)
+PYTHONPATH="$ROOT/tools${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m replkit "$@"

@@ -1,0 +1,18 @@
+{
+  "color": {
+    "bg": "#ffffff",
+    "surface": "#f6f7f9",
+    "border": "#e3e6ea",
+    "text": "#14171c",
+    "accent": "#2f5bea",
+    "on-accent": "#ffffff"
+  },
+  "font": {
+    "sans": "Inter, system-ui, sans-serif"
+  },
+  "pairs": [
+    ["text", "bg"],
+    ["text", "surface"],
+    ["on-accent", "accent"]
+  ]
+}

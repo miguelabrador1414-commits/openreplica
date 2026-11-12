@@ -1,18 +1,17 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "replica-skill",
-  "description": "The Replica skill pack for Claude",
+  "name": "openreplica",
+  "description": "The OpenReplica skill pack. opencode is the supported target.",
   "owner": {
-    "name": "Jake Schincariol",
-    "url": "https://opusjake.ai"
+    "name": "Miguel"
   },
   "plugins": [
     {
-      "name": "replica-skill",
-      "description": "Eleven Claude skills that clone any app: recon, architecture, design, build, backend, test, parity diff, a review-reading Entrepreneur skill, brand, launch and deploy.",
+      "name": "openreplica",
+      "description": "Eleven skills that rebuild an app clean-room: recon, architecture, design, build, backend, test, parity, reviews, brand, launch and deploy.",
       "source": "./",
       "category": "productivity",
-      "homepage": "https://github.com/Jakeschincariol/replica-skill"
+      "homepage": "https://github.com/miguelabrador1414-commits/openreplica"
     }
   ]
 }

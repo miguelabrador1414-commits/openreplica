@@ -1,218 +1,291 @@
-# The Replica skill
+# OpenReplica
 
-Eleven Claude skills that clone any app. Free, MIT, no signup, no API key,
-nothing to connect.
+Eleven opencode-native skills that rebuild an app's functionality clean-room,
+then give the result its own name, brand and launch. Free, MIT, no signup, no
+API key required by the pack itself.
 
-One reverse-engineers the app you want to clone. One rebuilds it. One tests it
-for bugs. And one is the Entrepreneur: it reads what the app's users hate and
-fixes it in yours, so you have an app you can sell.
+[Leer en español](README.es.md)
 
-In between, the others plan the stack and the database, rebuild the design
-system, wire up auth and payments, score your clone against the original, give
-it a name and a brand of its own, write the landing page and the store
-listing, and put it live on your domain.
+OpenReplica is a fork of [The Replica skill](https://github.com/Jakeschincariol/replica-skill)
+by Jake Schincariol, rebuilt around a single `replica` CLI, explicit project
+state and deterministic quality gates.
+
+## What it does
+
+One skill reverse-engineers the app you want to clone. One rebuilds it. One
+tests it for bugs. Another reads what the original's users hate and turns it
+into a fix plan. In between, the pack plans the stack, rebuilds the design
+system, wires auth and payments, scores parity, names and rebrands the result,
+writes the launch, and ships it.
+
+The workflow is:
+
+```text
+recon -> architect -> design -> build -> backend -> test -> diff
+      -> entrepreneur -> brand -> launch -> deploy
+```
+
+Each phase writes evidence into `replica/` in your project. Each phase has a
+gate. You do not move on until the gate passes.
 
 **It rebuilds what an app does, never what it owns.** Features and flows,
-clean-room style. Not its code, its logo, its copy or its content. The
-fine print is at the bottom, and the skills enforce it.
+clean-room style. Not its source code, logo, copy, fonts, content or private
+APIs.
+
+## Requirements
+
+- [opencode](https://opencode.ai) with a model that can call tools.
+- Python 3.8 or newer for the CLI.
+- Optional: Playwright and Chromium for real browser capture. The default
+  capture path is offline and does not download anything.
+
+The core CLI has no runtime dependencies outside the Python standard library.
 
 ## Install
 
-Paste this into Claude:
-
-```
-https://github.com/Jakeschincariol/replica-skill
-
-install skill
-```
-
-Or as a plugin, in Claude Code:
-
-```
-/plugin marketplace add Jakeschincariol/replica-skill
-/plugin install replica-skill@replica-skill
-```
-
-Claude Code namespaces plugin skills, so installed as a plugin they show up as
-`/replica-skill:replica-recon` and so on. Copy the folders instead if you want
-plain `/replica-recon`:
+### Global
 
 ```bash
-git clone https://github.com/Jakeschincariol/replica-skill.git
-cp -r replica-skill/replica-* ~/.claude/skills/
+git clone https://github.com/miguelabrador1414-commits/openreplica.git
+cd openreplica
+./scripts/install.sh --global
+export PATH="$HOME/.local/bin:$PATH"
+replica doctor
 ```
 
-Project-local instead of global: copy the same folders into your repo's
-`.claude/skills/`. No Claude Code at all? Paste any single `SKILL.md` at the
-top of a chat and it runs as a mode. You lose the Python tools, but the
-method works.
+This installs:
 
-The tools need Python 3.8 or newer. Nothing to pip install.
+- the CLI in `~/.local/share/openreplica`,
+- the wrapper in `~/.local/bin/replica`,
+- skills in `~/.config/opencode/skills`,
+- commands in `~/.config/opencode/commands`,
+- the agent in `~/.config/opencode/agents`.
 
-## The eleven
+Restart opencode after installing so it loads the new files.
 
-| command | what it does |
+### Per project
+
+```bash
+./scripts/install.sh --project /path/to/your-app
+```
+
+This copies the skills, commands, agent, project config and a local CLI into
+the target project. It does not touch your global config. If the project
+already has `.opencode/opencode.json`, the installer leaves it alone and asks
+you to add the two settings yourself. Use the local CLI when `replica` is not
+on your `PATH`:
+
+```bash
+/path/to/your-app/.opencode/bin/replica doctor
+```
+
+### Manual
+
+```bash
+git clone https://github.com/miguelabrador1414-commits/openreplica.git
+cp -R openreplica/.opencode/skills/* ~/.config/opencode/skills/
+cp -R openreplica/.opencode/commands/* ~/.config/opencode/commands/
+cp -R openreplica/.opencode/agents/* ~/.config/opencode/agents/
+ln -sf "$PWD/openreplica/bin/replica" ~/.local/bin/replica
+```
+
+### Claude Code compatibility
+
+The upstream `.claude-plugin` manifest is kept and points at `.opencode/skills`.
+opencode is the tested target; Claude Code support is best-effort and not part
+of the test matrix.
+
+## Quick start
+
+```bash
+cd my-app
+replica init
+opencode
+```
+
+Then run the phases in order:
+
+```text
+/replica-recon https://example.com
+/replica-architect
+/replica-design
+/replica-build
+/replica-backend
+/replica-test
+/replica-diff
+/replica-entrepreneur
+/replica-brand
+/replica-launch
+/replica-deploy
+```
+
+You can run any phase on its own. `/replica-entrepreneur` on an app you are
+only thinking about cloning is a good way to decide whether it is worth it.
+
+## The eleven phases
+
+| # | Command | What it produces | Gate checks |
+| --- | --- | --- | --- |
+| 1 | `/replica-recon` | `replica/recon.md`, `replica/features.csv`, screenshots | Map, matrix, priorities, must-haves |
+| 2 | `/replica-architect` | `replica/architecture.md` | Stack, schema, routes, build order |
+| 3 | `/replica-design` | `replica/design/tokens.json`, component specs | Tokens and WCAG AA contrast |
+| 4 | `/replica-build` | App screens, `replica/build-log.md`, updated matrix | Implemented features and clone screenshots |
+| 5 | `/replica-backend` | Migrations, server code, `replica/backend.md` | Backend notes, `.env.example`, no secrets |
+| 6 | `/replica-test` | `replica/test-plan.md`, `replica/bugs.md`, e2e tests | Plan present, no open S1 or S2 |
+| 7 | `/replica-diff` | `replica/parity.json`, diff images | Parity score at least 70 |
+| 8 | `/replica-entrepreneur` | `replica/reviews.csv`, `replica/feedback.md`, `replica/fixes.md` | Linked reviews and a fix plan |
+| 9 | `/replica-brand` | `replica/brand.md`, `replica/brand.json` | Clean rebrand sweep |
+| 10 | `/replica-launch` | `replica/launch/`, `replica/listing.json` | Store listing lint has no errors |
+| 11 | `/replica-deploy` | `replica/preflight.md`, production setup | Full preflight, parity at least 80, clean sweep |
+
+The skills contain the detailed method. The gates are the contract.
+
+## State and gates
+
+```bash
+replica init                 # create replica/state.json
+replica status               # current phase and next step
+replica mark recon in_progress
+# do the work
+replica gate recon           # exit 0 pass, exit 2 blocked
+replica mark recon passed    # only after the gate passes
+```
+
+`replica gate` checks the artifacts, not your confidence. If it fails, it
+lists the exact file or value to fix.
+
+## The CLI
+
+| Command | Purpose |
 | --- | --- |
-| `/replica-recon` | Reverse-engineers any app: screens, flows, components, data model. From public pages, screenshots, store listings and your own account. |
-| `/replica-architect` | Plans the stack, database schema and API for your clone. |
-| `/replica-design` | Rebuilds the design system: colours, type, spacing, components. As tokens, with your own assets. |
-| `/replica-build` | Rebuilds the app screen by screen from the recon map. |
-| `/replica-backend` | Auth, database, payments and integrations. |
-| `/replica-test` | Clicks through every flow and tests it for bugs. |
-| `/replica-diff` | Compares your clone against the original. A parity score and what is missing. |
-| `/replica-entrepreneur` | Reads what the app's users hate in real reviews and turns it into fixes and a positioning angle. |
-| `/replica-brand` | Names and rebrands your version so it is yours. |
-| `/replica-launch` | Landing page, pricing and App Store listing. |
-| `/replica-deploy` | Ships it live on your own domain. |
+| `replica init` | Create `replica/` and the state file. |
+| `replica status` | Show phase status and the next phase. |
+| `replica mark` | Update a phase status, note or artifact list. |
+| `replica gate` | Check a phase against its evidence rules. |
+| `replica doctor` | Check Python, git, node, Playwright, state and PATH. |
+| `replica capture` | Capture a URL or a local fixture. Offline by default. |
+| `replica extract` | Read routes, controls, colours and fonts from HTML. |
+| `replica imgdiff` | Compare two screenshots by layout or pixels. |
+| `replica parity` | Score the feature matrix and list what is missing. |
+| `replica contrast` | Check WCAG contrast on design tokens. |
+| `replica sweep` | Find the original's name, domain or colours. |
+| `replica reviews` | Rank real reviews into complaints and requests. |
+| `replica listing` | Lint an App Store or Google Play listing. |
 
-## How to use it
-
-Run them in order. Each one reads what the last one wrote, in a `replica/`
-folder in your project.
-
-```
-recon -> architect -> design -> build -> backend -> test -> diff -> entrepreneur -> brand -> launch -> deploy
-```
-
-An example: cloning a scheduling app, the kind where you share a link and
-people book a time with you.
-
-1. **`/replica-recon`** with the app's URL. It reads the help center, the
-   pricing page, the store listing and public walkthroughs, and you click
-   through your own account with it. Out comes `replica/recon.md`: 18
-   screens, 7 flows (guest books a meeting, host sets availability, guest
-   reschedules...), the components, an inferred data model (users, event
-   types, availability, bookings) and `features.csv`. The partner
-   marketplace is marked out of scope: that is their network, not a feature.
-2. **`/replica-architect`** picks Next.js, Postgres, Stripe and Resend, writes
-   the schema (with a constraint so two guests can never book the same slot)
-   and orders the build: the booking flow end to end first.
-3. **`/replica-design`** measures the screenshots into tokens: colour roles,
-   type scale, 8px spacing, the date picker and slot button specs. Open
-   icons, an open font, your own words.
-4. **`/replica-build`** builds the shell, then the booking flow, then every
-   screen with all its states, ticking off `features.csv` as it goes.
-5. **`/replica-backend`** adds sign up, Google Calendar through Google's own
-   API with your keys, Stripe for paid bookings, reminder emails.
-6. **`/replica-test`** writes a test plan from the 7 flows, Playwright specs
-   for the happy paths and edge cases (time zones, a slot taken mid-booking,
-   double submit), and logs bugs by severity until no S1 or S2 is open.
-7. **`/replica-diff`** scores it. Features 86, all must-haves done, booking
-   page layout 91. Missing: round-robin for teams, the website embed.
-8. **`/replica-entrepreneur`** reads 140 real reviews across the App Store,
-   G2, Capterra and Reddit. Top complaints: per-seat price jumps, no text
-   reminders, guests confused by time zones. Each with counts and linked
-   quotes. Fix plan: flat pricing, SMS reminders, a time zone confirm step.
-   Angle: booking links for small teams that hate per-seat pricing.
-9. **`/replica-brand`** names it (with the trademark and domain checks to
-   run), gives it a new palette, a logo brief and a voice, then sweeps the
-   codebase until nothing of the original is left.
-10. **`/replica-launch`** writes the landing page around the angle, sets
-    pricing against the original's public page, and lints the store listing.
-11. **`/replica-deploy`** runs the preflight (tests, parity, sweep, listing),
-    sets up production, gives you the DNS records for your domain, and ships
-    it when you say go.
-
-You can also run any one on its own. `/replica-entrepreneur` on an app you
-are only thinking about cloning is a good way to find out if you should.
-
-## The tools
-
-Six of them, all standard-library Python. None touch the network.
+Examples:
 
 ```bash
-python3 replica-diff/imgdiff.py original.png clone.png --out diff.png   # layout diff, ignores colour
-python3 replica-diff/parity.py replica/features.csv                     # parity score + missing list
-python3 replica-entrepreneur/reviews.py replica/reviews.csv             # what users hate, ranked, linked
-python3 replica-design/contrast.py replica/design/tokens.json           # WCAG contrast on your tokens
-python3 replica-brand/sweep.py . --avoid "Original App"                 # anything of the original left?
-python3 replica-launch/listing.py replica/launch/listing.json           # store limits + copycat checks
+replica parity replica/features.csv --visual replica/diffs/*.json --markdown
+replica imgdiff replica/screens/S07.png replica/clone-screens/S07.png --out diff-S07.png
+replica contrast replica/design/tokens.json
+replica sweep . --config replica/brand.json
+replica listing replica/launch/listing.json
 ```
 
-**`imgdiff.py`** reads PNGs with no libraries, turns both screenshots into
-edge maps and compares where things are, so your new colours do not count
-against you. It tells you which regions differ, in the original's pixels.
+## Offline capture, real capture
 
-**`parity.py`** weights must, should and could, counts partial as half, and
-never scores what you left out on purpose or what you added. Missing
-must-haves means not shippable, and it says so.
+`replica capture` defaults to a deterministic path:
 
-**`reviews.py`** drops every review without a link. Every quote it prints is
-copied from a row you gave it, with that row's URL. Themes with under three
-reviews or one source are marked thin.
+- `--backend stub` with `--fixture` reads a local HTML or folder. No network,
+  no downloads.
+- `--backend manual` writes a checklist with the exact viewports to capture.
+- `--backend playwright --allow-network` uses a real browser. It only works if
+  Playwright and Chromium are installed by you.
 
-**`sweep.py`** finds the original's name, domain and colours anywhere in your
-code, including inside identifiers like `OriginalAppEmbed`, and blocks the
-deploy until it is clean.
+The pack never downloads Chromium on its own.
 
-**`listing.py`** checks App Store and Google Play limits, ranking claims in
-the title, wasted keyword characters, and the original's name anywhere in
-your listing.
+## Models
+
+The project default is `opencode/deepseek-v4.1-flash-free`. It is set in:
+
+- `.opencode/opencode.json` as the project model and default agent,
+- `.opencode/agents/replica.md` as the agent model.
+
+To use another model, change both files. Model IDs always carry a provider
+prefix. The deterministic CLI and the gates reduce how much the result depends
+on the model, but use a model that can call tools reliably.
+
+## Repository layout
+
+```text
+.opencode/
+  skills/replica-*/SKILL.md    the 11 phase skills and their references
+  commands/replica-*.md        one opencode command per phase
+  agents/replica.md            orchestrator agent
+  opencode.json                project default agent and model
+tools/replkit/                 dependency-free Python CLI
+bin/replica                    wrapper for a checkout
+tests/                         unit, fixture and repository tests
+docs/es/                       Spanish guides
+scripts/install.sh             global or per-project install
+```
+
+Your project artifacts live in `replica/` in your own app, not in this repo.
+
+## Development
 
 ```bash
-python3 -m unittest discover -s tests -v
+make check     # compile, run 102 tests, lint if ruff is installed
+make test      # unit tests only
+./bin/replica --help
 ```
 
-## Fine print
+Rules for contributors:
 
-**It rebuilds functionality and UX patterns, clean-room style.** It studies
-what the app does and how people move through it, then writes everything
-fresh. It never copies the target's source code, proprietary assets, logos,
-trademarks, copy or private APIs.
+- Core Python stays standard library only.
+- Deterministic logic goes in `tools/replkit/`, not in skill prose.
+- Every CLI command needs a test.
+- English is the main language. Keep `README.es.md` and `docs/es/` in sync.
+- No em dashes in repository text. The tests enforce it.
+- Do not commit secrets, private screenshots or personal review exports.
 
-**It only reads what you are allowed to read.** Public pages and your own
-account. It never scrapes behind a login or against a site's terms, never
-logs into anyone else's account, and never gets past a paywall. If your
-account's terms forbid using it to build a competitor, it says so and sticks
-to public sources.
+## Spanish guides
 
-**It always rebrands before launch.** New name, new palette, new logo, new
-words. `/replica-deploy` will not ship until the sweep is clean.
+- [Instalación](docs/es/instalacion.md)
+- [Flujo de trabajo](docs/es/flujo.md)
+- [Referencia del CLI](docs/es/cli.md)
+- [Modelos y agente](docs/es/modelos.md)
+- [Seguridad y legal](docs/es/seguridad-legal.md)
 
-**"Clone any app" means the features and the flow.** Not the content, the
-network or the licences an app owns. You can rebuild a music app's player,
-playlists and sharing. You cannot clone its catalogue.
+## Safety and legal
 
-**No guarantee of a "perfect" clone.** Results depend on how complex the app
-is. A booking tool is weeks. A spreadsheet engine is not. `/replica-recon`
-sizes it honestly before you start, and `/replica-diff` gives you a real
-number, not a vibe.
+**Clean room.** OpenReplica studies what an app does and how a user moves
+through it, then writes everything fresh. It never copies the target's source
+code, proprietary assets, logos, trademarks, copy or private APIs.
 
-**The Entrepreneur never makes things up.** No invented reviews, quotes or
-numbers. Every claim has a link, and the sample size is stated.
+**Allowed sources only.** Public pages and your own account. It never logs into
+someone else's account, bypasses a paywall or scrapes behind a login. If your
+account terms forbid using it to build a competitor, the skills say so and
+stick to public sources.
 
-**Check before you sell.** Run the trademark checks `/replica-brand` lists,
-read the terms of anything you used, and talk to a lawyer before launch if
-there is money on the line. This is not legal advice.
+**Rebrand before launch.** New name, new palette, new logo, new words. The
+deploy gate blocks until the sweep is clean.
 
-## Files
+**"Clone any app" means functionality and flow.** Not the content, network or
+licences an app owns. You can rebuild a music app's player, playlists and
+sharing. You cannot clone its catalogue.
 
-```
-replica-recon/         SKILL.md, recon-map.md, features.csv (the matrix template)
-replica-architect/     SKILL.md, architecture.md
-replica-design/        SKILL.md, tokens.json, contrast.py
-replica-build/         SKILL.md
-replica-backend/       SKILL.md
-replica-test/          SKILL.md, test-plan.md, bug-report.md, e2e.example.spec.ts
-replica-diff/          SKILL.md, imgdiff.py, parity.py
-replica-entrepreneur/  SKILL.md, reviews.py, themes.json
-replica-brand/         SKILL.md, sweep.py
-replica-launch/        SKILL.md, listing.py, listing.example.json
-replica-deploy/        SKILL.md, preflight.md
-tests/                 the tests for every tool
-```
+**No perfect clone guarantee.** Results depend on the app. A booking tool is
+weeks. A spreadsheet engine is not. Recon sizes it honestly and parity gives
+you a number, not a vibe.
 
-Your own files live in `replica/` in your project. The skills read each
-other's.
+**No invented evidence.** The Entrepreneur never fabricates reviews, quotes,
+ratings or sources. Every quote is verbatim and linked, and the sample size is
+stated.
+
+**Check before you sell.** Run the trademark and domain checks the brand phase
+lists, read the terms of everything you use, and talk to a lawyer before
+launch if there is money on the line. This is not legal advice.
 
 ## Credit
 
-Made by Jake Schincariol, [opusjake.ai](https://opusjake.ai). Siblings:
-[Arena](https://github.com/Jakeschincariol/arena-skill),
-[X](https://github.com/Jakeschincariol/x-agent-skill),
-[LinkedIn](https://github.com/Jakeschincariol/linkedin-agent-skill),
-[Instagram](https://github.com/Jakeschincariol/instagram-agent-skill).
+Original project: [The Replica skill](https://github.com/Jakeschincariol/replica-skill)
+by Jake Schincariol, [opusjake.ai](https://opusjake.ai). The upstream
+copyright and MIT terms are retained in `LICENSE` and `NOTICE`.
+
+OpenReplica modifications and the opencode integration are maintained by
+Miguel.
 
 ## License
 
-MIT. Take it, change it, ship it.
+MIT. Take it, change it, ship it. See [LICENSE](LICENSE).

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Share one link and let clients book a time.">
+    <title>Slotwise: Booking Links</title>
+    <style>
+      body { background: #ffffff; color: #14171c; font-family: Inter, system-ui, sans-serif; }
+      .card { background: #f6f7f9; border: 1px solid #e3e6ea; }
+      .cta { background: #2f5bea; color: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand">Slotwise</a>
+      <nav>
+        <a href="/pricing">Pricing</a>
+        <a href="/login">Log in</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Share one link. Get booked.</h1>
+      <p class="lede">Clients pick a time that works. No back and forth.</p>
+      <section class="card">
+        <h2>Your booking link</h2>
+        <form action="/book" method="post">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com">
+          <input name="timezone" type="hidden" value="Europe/Madrid">
+          <button class="cta" type="submit">Create my link</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>Why teams switch</h2>
+        <ul>
+          <li>Time zone detection</li>
+          <li>Buffer time between meetings</li>
+          <li>Email reminders</li>
+        </ul>
+        <button type="button">See a demo</button>
+      </section>
+    </main>
+    <footer>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </footer>
+  </body>
+</html>

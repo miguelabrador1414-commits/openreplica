@@ -1,0 +1,20 @@
+OpenReplica
+Copyright (c) 2026 Miguel <miguelabrador1414@gmail.com>
+
+This project is a fork of "The Replica skill" by Jake Schincariol:
+https://github.com/Jakeschincariol/replica-skill
+
+The upstream project is licensed under the MIT License. The original
+copyright notice is retained in LICENSE. The deterministic tooling in
+tools/replkit (image diff, parity matrix, brand sweep, contrast checker,
+review ranking, store listing linter) is derived from the upstream
+implementation and has been adapted to run as a single Python CLI.
+
+Upstream copyright:
+Copyright (c) 2026 Jake Schincariol
+
+Modifications and new code:
+Copyright (c) 2026 Miguel
+
+Both the upstream and modified code are distributed under the MIT License.
+See LICENSE for the full text.
