@@ -1,5 +1,7 @@
 # OpenReplica
 
+[![tests](https://github.com/miguelabrador1414-commits/openreplica/actions/workflows/tests.yml/badge.svg)](https://github.com/miguelabrador1414-commits/openreplica/actions/workflows/tests.yml)
+
 Eleven opencode-native skills that rebuild an app's functionality clean-room,
 then give the result its own name, brand and launch. Free, MIT, no signup, no
 API key required by the pack itself.
